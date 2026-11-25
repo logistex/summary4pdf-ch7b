@@ -2,6 +2,7 @@
 // 실행: node --env-file=.env scripts/check-models.mjs
 // 키 값과 요청 헤더는 출력하지 않는다.
 
+// src/lib/ai/models.ts와 같은 값을 유지할 것(모델을 바꾸면 함께 고친다).
 const MODELS = [
   'nvidia/nemotron-3-ultra-550b-a55b:free',
   'nvidia/nemotron-3.5-super-vl:free',
