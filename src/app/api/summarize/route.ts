@@ -3,7 +3,7 @@ import { extractPdfText, PdfError, type ExtractResult } from '@/lib/pdf/extract'
 import { validateUpload } from '@/lib/pdf/validate';
 import { ERROR_STATUS, errorBody, type ApiSuccess, type ErrorCode } from '@/lib/types';
 
-export const runtime = 'nodejs';
+// 런타임은 기본값(Node.js)을 쓴다. Next.js 16에서 cacheComponents와 runtime 설정을 함께 쓸 수 없다.
 export const maxDuration = 150;
 
 function fail(code: ErrorCode): Response {
