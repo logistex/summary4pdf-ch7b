@@ -2,19 +2,24 @@ import type { Definition, KeyConcept, SummaryResult } from '@/lib/types';
 import { MAX_DEFINITIONS, MAX_KEY_CONCEPTS } from '@/lib/limits';
 
 /**
- * 한글 음절 수가 영문 글자 수 이상이면 한국어로 본다.
- * 영어 용어를 괄호로 붙이는 것은 허용되므로, 괄호 안의 글자는 영문 수에서 뺀다.
+ * 한글이 있고, 한글 음절 수가 영문 단어 수 이상이면 한국어로 본다.
+ * 영어 용어를 섞거나 괄호로 붙이는 것은 허용되므로 기준은 넉넉하게 잡는다:
+ * 영문은 글자가 아니라 단어 단위로 세고, 괄호 안의 영문은 뺀다.
+ * 한글이 하나도 없으면(빈 글, 숫자·기호뿐인 글, 괄호 안에 든 영어 문장 등) 한국어가 아니다.
  */
 export function isKorean(s: string): boolean {
   const hangul = (s.match(/[가-힣]/g) ?? []).length;
   const withoutParens = s.replace(/[(（][^)）]*[)）]/g, ' ');
-  const latin = (withoutParens.match(/[A-Za-z]/g) ?? []).length;
-  return hangul >= latin;
+  const latinWords = (withoutParens.match(/[A-Za-z]+/g) ?? []).length;
+  return hangul > 0 && hangul >= latinWords;
 }
 
-/** 응답 글에서 JSON 객체 부분만 꺼낸다: 코드 블록 표시를 걷고 첫 `{`부터 마지막 `}`까지. */
+/**
+ * 응답 글에서 JSON 객체 부분만 꺼낸다: 추론형 모델의 <think> 블록과 코드 블록 표시를 걷고
+ * 첫 `{`부터 마지막 `}`까지.
+ */
 function extractJson(raw: string): unknown {
-  const stripped = raw.replace(/```(?:json)?/gi, '');
+  const stripped = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/```(?:json)?/gi, '');
   const start = stripped.indexOf('{');
   const end = stripped.lastIndexOf('}');
   if (start === -1 || end <= start) return null;

@@ -55,10 +55,26 @@ describe('parseSummary', () => {
         }),
       ),
     ).toBeNull());
+  test('<think> 블록이 먼저 나오는 응답', () =>
+    expect(parseSummary('<think>{"draft":1} 생각…</think>\n' + JSON.stringify(ok))).toEqual(ok));
+  test('여러 줄·대소문자가 섞인 <THINK> 블록', () =>
+    expect(parseSummary('<THINK>\n{ 메모 }\n</THINK>\n' + JSON.stringify(ok))).toEqual(ok));
 });
 
 describe('isKorean', () => {
   test('영어 용어를 괄호로 붙인 한국어는 통과', () =>
     expect(isKorean('엽록체(Chloroplast)는 광합성(photosynthesis)이 일어나는 곳이다.')).toBe(true));
   test('영어만 있으면 false', () => expect(isKorean('Hello world')).toBe(false));
+  test('영어 용어를 섞은 정상 한국어 요약은 통과', () =>
+    expect(
+      isKorean(
+        '이 논문은 Transformer 구조를 제안하며 RNN 없이 self-attention만으로 문장 안의 관계를 학습하고 positional encoding으로 sequence 순서를 표현한다.',
+      ),
+    ).toBe(true));
+  test('영어 문장은 false', () =>
+    expect(isKorean('Photosynthesis converts light energy into chemical energy in plants.')).toBe(false));
+  test('빈 문자열은 false', () => expect(isKorean('')).toBe(false));
+  test('한글·영문이 모두 없는 글은 false', () => expect(isKorean('123 + 456 = 579')).toBe(false));
+  test('영어 문장 전체가 괄호 안이면 false', () =>
+    expect(isKorean('(Photosynthesis converts light energy into chemical energy.)')).toBe(false));
 });
