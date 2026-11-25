@@ -23,7 +23,13 @@ export async function POST(req: Request): Promise<Response> {
   };
 
   try {
-    const form = await req.formData();
+    // multipart가 아닌 요청 등 본문을 읽지 못하면 클라이언트 쪽 문제이므로 NO_FILE로 답한다.
+    let form: FormData;
+    try {
+      form = await req.formData();
+    } catch {
+      return respondError('NO_FILE');
+    }
     const file = form.get('file');
     if (!(file instanceof File)) return respondError('NO_FILE');
     size = file.size;

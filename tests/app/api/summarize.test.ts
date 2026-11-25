@@ -57,6 +57,17 @@ describe('POST /api/summarize', () => {
     expect(body.message).toBe(ERROR_MESSAGES.NO_FILE);
   });
 
+  test('multipart가 아닌 요청', async () => {
+    const req = new Request('http://localhost/api/summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ a: 1 }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    expect((await res.json()).code).toBe('NO_FILE');
+  });
+
   test('너무 큼', async () => {
     const big = new Uint8Array(MAX_FILE_BYTES + 1);
     big.set(new TextEncoder().encode('%PDF-1.7'));

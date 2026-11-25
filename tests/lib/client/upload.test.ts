@@ -45,6 +45,15 @@ describe('postPdf', () => {
     expect(await postPdf(file, f)).toEqual({ ok: false, code: 'INTERNAL_ERROR', message: ERROR_MESSAGES.INTERNAL_ERROR });
   });
 
+  test.each([
+    ['ok:true인데 summary 없음', 200, { ok: true }],
+    ['ok:true인데 summary가 비어 있음', 200, { ok: true, summary: {} }],
+    ['ok:false인데 code·message 없음', 400, { ok: false }],
+  ])('모양이 틀린 JSON: %s', async (_name, status, body) => {
+    const f = fakeFetch(new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } }));
+    expect(await postPdf(file, f)).toEqual({ ok: false, code: 'INTERNAL_ERROR', message: ERROR_MESSAGES.INTERNAL_ERROR });
+  });
+
   test('네트워크 오류', async () => {
     const f = vi.fn().mockRejectedValue(new TypeError('Failed to fetch')) as unknown as typeof fetch;
     expect(await postPdf(file, f)).toEqual({ ok: false, code: 'INTERNAL_ERROR', message: ERROR_MESSAGES.INTERNAL_ERROR });
